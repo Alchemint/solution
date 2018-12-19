@@ -24,7 +24,7 @@ namespace SAR4C
         public delegate object NEP5Contract(string method, object[] args);
 
         //Default multiple signature committee account
-        private static readonly byte[] committee = Helper.ToScriptHash("AaBmSJ4Beeg2AeKczpXk89DnmVrPn3SHkU");
+        private static readonly byte[] committee = Helper.ToScriptHash("AZ77FiX7i9mRUPF2RyuJD2L8kS6UDnQ9Y7");
 
 
         /** 
@@ -1141,9 +1141,11 @@ namespace SAR4C
                 rate = (BigInteger)OracleContract("getTypeA", arg);
             }
 
-            BigInteger hasDrawPNeo = hasDrawed * rate * SIX_POWER / nep5Price;
+            //Verify asset security
+            if(mount > locked)
+                throw new InvalidOperationException("The param is exception.");
 
-            if (mount > locked - hasDrawPNeo)
+            if(hasDrawed * rate * SIX_POWER > (locked - mount) * nep5Price)
                 throw new InvalidOperationException("The param is exception.");
 
             byte[] from = ExecutionEngine.ExecutingScriptHash;
@@ -1417,6 +1419,7 @@ namespace SAR4C
             return true;
         }
 
+
         private static Boolean expande(byte[] addr, BigInteger drawMount)
         {
             if (addr.Length != 20)
@@ -1466,9 +1469,7 @@ namespace SAR4C
                 fee_rate = config.fee_rate_c;
             }
 
-            BigInteger allSd = locked * assetPrice / (rate * SIX_POWER);
-
-            if (allSd < hasDrawed + drawMount)
+            if (locked * assetPrice < (hasDrawed + drawMount) * rate * SIX_POWER)
                 throw new InvalidOperationException("The sar can draw larger than max.");
 
             BigInteger totalSupply = 0;

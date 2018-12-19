@@ -16,7 +16,7 @@ namespace SDUSD
         public static event Action<byte[], byte[], BigInteger> Transferred;
 
         //Default multiple signature committee account
-        private static readonly byte[] committee = Helper.ToScriptHash("AaBmSJ4Beeg2AeKczpXk89DnmVrPn3SHkU");
+        private static readonly byte[] committee = Helper.ToScriptHash("AZ77FiX7i9mRUPF2RyuJD2L8kS6UDnQ9Y7");
 
         //Static param
         private const string TOTAL_SUPPLY = "totalSupply";
@@ -49,7 +49,7 @@ namespace SDUSD
         /// </returns>
         public static Object Main(string operation, params object[] args)
         {
-            var magicstr = "2018-11-30 17:40:10";
+            var magicstr = "2018-12-17 14:40:10";
 
             if (Runtime.Trigger == TriggerType.Verification)
             {
@@ -129,7 +129,7 @@ namespace SDUSD
                     return destory(addr, value);
                 }
 
-                #region 升级合约,耗费490,仅限管理员
+                #region contract upgrade
                 if (operation == "upgrade")
                 {
                     //only committee account can call this method
