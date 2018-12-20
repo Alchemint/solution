@@ -638,8 +638,7 @@ namespace SAR4C
                 rate = config.liquidate_line_rate_c;
             }
 
-            BigInteger currentRate = locked * nep5Price / (hasDrawed * 10000);
-            if (currentRate >= rate * 100)
+            if ((locked * nep5Price) >= (rate * hasDrawed * 1000000))
                 throw new InvalidOperationException("The param is exception.");
 
             {
