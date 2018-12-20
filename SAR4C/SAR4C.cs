@@ -103,7 +103,7 @@ namespace SAR4C
         /// </returns>
         public static Object Main(string operation, params object[] args)
         {
-            var magicstr = "2018-12-04 14:40:10";
+            var magicstr = "2018-12-20 14:40:10";
 
             if (Runtime.Trigger == TriggerType.Verification)
             {
@@ -1075,7 +1075,8 @@ namespace SAR4C
                 object[] arg = new object[2];
                 arg[0] = addr;
                 arg[1] = mount;
-                if (!(bool)SDUSDContract("destory", arg)) return false;
+                if (!(bool)SDUSDContract("destory", arg))
+                   throw new InvalidOperationException("The param is exception.");
             }
 
             sarInfo.lastHeight = blockHeight;
