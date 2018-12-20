@@ -787,6 +787,9 @@ namespace SAR4C
             if (mount > hasDrawed)
                 throw new InvalidOperationException("The param is exception.");
 
+            if (lockedNeo <= 0)
+                throw new InvalidOperationException("The param is exception.");
+
             BigInteger nep5Price = 0;
             {
                 var OracleContract = (NEP5Contract)oracleAssetID.ToDelegate();
@@ -811,26 +814,26 @@ namespace SAR4C
 
             BigInteger currentRate = lockedNeo * nep5Price / (hasDrawed * 10000);
 
-            if (currentRate >= rate * 100)
+            rateClear = getRateClear(currentRate, rateClear);
+
+            if (lockedNeo * nep5Price >= hasDrawed * rate * 1000000)
                 throw new InvalidOperationException("The param is exception.");
 
             BigInteger canClearNeo = 0;
 
-            rateClear = getRateClear(currentRate, rateClear);
-
             if (currentRate > 10000 && currentRate < rate * 100)
             {
                 canClearNeo = mount * TEN_POWER / (nep5Price * rateClear);
-
                 if (canClearNeo <= 0)
                     throw new InvalidOperationException("The param is exception.");
+ 
+                if (canClearNeo >= lockedNeo)
+                    throw new InvalidOperationException("The param is exception.");
+    
+                if (mount >= hasDrawed)
+                    throw new InvalidOperationException("The param is exception.");
 
-                if (canClearNeo > lockedNeo)
-                    canClearNeo = lockedNeo;
-
-                BigInteger lastRate = (lockedNeo - canClearNeo) * nep5Price / ((hasDrawed - mount) * SIX_POWER);
-
-                if (lastRate > rescueRate)
+                if ((hasDrawed - mount) * SIX_POWER * rescueRate <= (lockedNeo - canClearNeo) * nep5Price)
                     throw new InvalidOperationException("The param is exception.");
             }
 
@@ -882,6 +885,8 @@ namespace SAR4C
                     ret = (result + 100) / 100;
                 }
             }
+            if (ret < rateClear)
+                throw new InvalidOperationException("The param is exception.");
             return ret;
 
         }
