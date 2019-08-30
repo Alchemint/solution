@@ -75,16 +75,6 @@ namespace SDUSD
                     byte[] from = (byte[])args[0];
                     byte[] to = (byte[])args[1];
                     BigInteger amount = (BigInteger)args[2];
-
-                    if (from.Length != 20 || to.Length != 20)
-                        throw new InvalidOperationException("The parameters from and to SHOULD be 20-byte addresses.");
-
-                    if (amount <= 0)
-                        throw new InvalidOperationException("The parameter amount MUST be greater than 0.");
-
-                    if (!IsPayable(to))
-                        return false;
-
                     if (!Runtime.CheckWitness(from) && from.AsBigInteger() != callscript.AsBigInteger())
                         return false;
                     return transfer(from, to, amount);

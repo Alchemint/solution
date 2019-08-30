@@ -24,7 +24,7 @@ namespace SAR4C
         public delegate object NEP5Contract(string method, object[] args);
 
         //Default multiple signature committee account
-        private static readonly byte[] committee = Helper.ToScriptHash("AZ77FiX7i9mRUPF2RyuJD2L8kS6UDnQ9Y7");
+        private static readonly byte[] committee = Helper.ToScriptHash("AaBmSJ4Beeg2AeKczpXk89DnmVrPn3SHkU");
 
 
         /** 
@@ -983,14 +983,6 @@ namespace SAR4C
             {
                 sarInfo.locked = lockedNeo - canClearNeo;
             }
-            sarInfo.hasDrawed = hasDrawed - bondMount;
-            sarInfo.bondLocked = bondLocked + canClearNeo;
-            sarInfo.bondDrawed = bondDrawed + bondMount;
-            Storage.Put(Storage.CurrentContext, key, Helper.Serialize(sarInfo));
-
-            byte[] bondKey = getBondGlobalKey(BOND_ISSUED_GLOBAL.AsByteArray());
-            BigInteger total = Storage.Get(Storage.CurrentContext, bondKey).AsBigInteger();
-            Storage.Put(Storage.CurrentContext, bondKey, total + bondMount);
 
             var txid = ((Transaction)ExecutionEngine.ScriptContainer).Hash;
 
@@ -1279,35 +1271,7 @@ namespace SAR4C
             }
             if (assetPrice <= 0) return false;
 
-            var txid = ((Transaction)ExecutionEngine.ScriptContainer).Hash;
-
-            SARInfo sarInfo = new SARInfo();
-            sarInfo.owner = addr;
-            sarInfo.locked = 0;
-            sarInfo.hasDrawed = 0;
-            sarInfo.txid = txid;
-            sarInfo.assetType = assetType;
-            sarInfo.status = 1;
-            sarInfo.bondLocked = 0;
-            sarInfo.bondDrawed = 0;
-
-            byte[] txinfo = Helper.Serialize(sarInfo);
-
-            Storage.Put(Storage.CurrentContext, key, txinfo);
-
-            SARTransferDetail detail = new SARTransferDetail();
-            detail.from = addr;
-            detail.sarTxid = txid;
-            detail.txid = txid;
-            detail.type = (int)ConfigTranType.TRANSACTION_TYPE_OPEN;
-            detail.operated = 0;
-            detail.hasLocked = 0;
-            detail.hasDrawed = 0;
-
-            Storage.Put(Storage.CurrentContext, getTxidKey(txid), Helper.Serialize(detail));
-
-            //notify
-            Operated(addr, txid, txid, (int)ConfigTranType.TRANSACTION_TYPE_OPEN, 0);
+            
             return true;
         }
 
@@ -1464,25 +1428,10 @@ namespace SAR4C
             BigInteger releaseMax = 0;
             BigInteger fee_rate = 0;
 
-            {
-                var OracleContract = (NEP5Contract)oracleAssetID.ToDelegate();
-                object[] arg = new object[1];
-                arg[0] = assetType;
-                Config config = (Config)OracleContract("getStructConfig", arg);
-                rate = config.liquidate_line_rate_c;
-                releaseMax = config.debt_top_c;
-                fee_rate = config.fee_rate_c;
-            }
-
             if (locked * assetPrice < (hasDrawed + drawMount) * rate * SIX_POWER)
                 throw new InvalidOperationException("The sar can draw larger than max.");
 
             BigInteger totalSupply = 0;
-            {
-                var SDUSDContract = (NEP5Contract)sdusdAssetID.ToDelegate();
-                object[] arg = new object[0];
-                totalSupply = (BigInteger)SDUSDContract("totalSupply", arg);
-            }
 
             if (totalSupply + drawMount > releaseMax)
                 throw new InvalidOperationException("The sar can draw larger than releaseMax.");
@@ -1674,5 +1623,13 @@ namespace SAR4C
             public BigInteger debt_top_c;
 
         }
+    }
+
+
+    public class TransferInfo
+    {
+        public byte[] from;
+        public byte[] to;
+        public BigInteger value;
     }
 }
